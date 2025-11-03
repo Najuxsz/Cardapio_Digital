@@ -1,5 +1,8 @@
 package com.cardapio_digital.model;
 
+//atributos da classe prato, são os mesmos do banco de dados, iremos fazer o crud sobre eles
+//CASO SEJA NECESSÁRIO FAZER A INSERÇÃO DE UM NOVO CAMPO, COMO CALORIAS, CATEGORIA...
+//deve-se adicionar aqui como atributo, no construtor, nos getters/setters, no banco de dados e no método DAO
 public class Prato {
     private int id;
     private String nome;
@@ -8,6 +11,10 @@ public class Prato {
     private String descricao;
 
     public Prato(int id, String nome, double preco, double tempoPreparo, String descricao) {
+
+        if (preco < 0) throw new IllegalArgumentException("Preço não pode ser negativo");
+        if (tempoPreparo < 0) throw new IllegalArgumentException("Tempo não pode ser negativo");
+
         this.id = id;
         this.nome = nome;
         this.preco = preco;
@@ -63,13 +70,12 @@ public class Prato {
     }
 
     @Override
+    //método toString() vem da classe Object, que é a classe base de todas as classes em Java.
+    //define como o objeto será convertido para texto
     public String toString() {
-        return "Prato{" +
-                "id=" + id +
-                ", nome='" + nome + '\'' +
-                ", preco=" + preco +
-                ", tempoPreparo=" + tempoPreparo +
-                ", descricao='" + descricao + '\'' +
-                '}';
+        return String.format(
+                "Prato: %d | %s | R$ %.2f | %s min | %s",
+                id, nome, preco, tempoPreparo, descricao
+        );
     }
 }
