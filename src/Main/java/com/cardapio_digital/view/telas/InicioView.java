@@ -1,5 +1,6 @@
 package com.cardapio_digital.view;
 
+import com.cardapio_digital.view.telas.CardapioView;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -36,8 +37,10 @@ public class InicioView {
 
         // Aqui será conectado o Controller depois
         btnAbrir.setOnAction(e -> {
-            System.out.println("Abrir Cardápio clicado!");
+            CardapioView cardapio = new CardapioView();
+            cardapio.start((Stage) btnAbrir.getScene().getWindow());
         });
+
 
         // Layout principal
         StackPane root = new StackPane();

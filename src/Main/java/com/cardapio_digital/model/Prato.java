@@ -15,6 +15,13 @@ public class Prato {
         this.descricao = descricao;
     }
 
+    public Prato(String nome, double preco, double tempoPreparo, String descricao) {
+        this.nome = nome;
+        this.preco = preco;
+        this.tempoPreparo = tempoPreparo;
+        this.descricao = descricao;
+    }
+
     public int getId() {
         return id;
     }
