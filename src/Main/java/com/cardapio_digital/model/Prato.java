@@ -6,11 +6,11 @@ package com.cardapio_digital.model;
 public class Prato {
     private int id;
     private String nome;
-    private double preco;
-    private double tempoPreparo;
+    private int preco;
+    private int tempoPreparo;
     private String descricao;
 
-    public Prato(int id, String nome, double preco, double tempoPreparo, String descricao) {
+    public Prato(int id, String nome, int preco, int tempoPreparo, String descricao) {
 
         if (preco < 0) throw new IllegalArgumentException("Preço não pode ser negativo");
         if (tempoPreparo < 0) throw new IllegalArgumentException("Tempo não pode ser negativo");
@@ -22,7 +22,7 @@ public class Prato {
         this.descricao = descricao;
     }
 
-    public Prato(String nome, double preco, double tempoPreparo, String descricao) {
+    public Prato(String nome, int preco, int tempoPreparo, String descricao) {
         this.nome = nome;
         this.preco = preco;
         this.tempoPreparo = tempoPreparo;
@@ -49,7 +49,7 @@ public class Prato {
         return preco;
     }
 
-    public void setPreco(double preco) {
+    public void setPreco(int preco) {
         this.preco = preco;
     }
 
@@ -57,7 +57,7 @@ public class Prato {
         return tempoPreparo;
     }
 
-    public void setTempoPreparo(double tempoPreparo) {
+    public void setTempoPreparo(int tempoPreparo) {
         this.tempoPreparo = tempoPreparo;
     }
 
