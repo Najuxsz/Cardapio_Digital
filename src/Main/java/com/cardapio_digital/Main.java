@@ -8,12 +8,13 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        //A MainApp chama apenas a View
+        // Inicia a tela inicial do sistema
         InicioView inicio = new InicioView();
         inicio.start(primaryStage);
     }
 
     public static void main(String[] args) {
+        // Inicia a aplicação JavaFX
         launch(args);
     }
 }
