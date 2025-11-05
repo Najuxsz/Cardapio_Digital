@@ -45,7 +45,7 @@ public class Prato {
         this.nome = nome;
     }
 
-    public double getPreco() {
+    public int getPreco() {
         return preco;
     }
 
@@ -53,7 +53,7 @@ public class Prato {
         this.preco = preco;
     }
 
-    public double getTempoPreparo() {
+    public int getTempoPreparo() {
         return tempoPreparo;
     }
 

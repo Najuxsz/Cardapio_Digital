@@ -32,9 +32,10 @@ public class InicioView {
         titulo.setEffect(new DropShadow(3, Color.GRAY));
 
         // --- Subtítulo ---
-        Label subtitulo = new Label("Explore nossos pratos e descubra sabores incríveis!");
+        Label subtitulo = new Label("Gerencie e atualize o cardápio do seu restaurante de forma prática e rápida!");
         subtitulo.setFont(Font.font("Arial", 18));
         subtitulo.setTextFill(Color.web("#6D4C41"));
+
 
         // --- Botão para abrir o cardápio ---
         Button btnAbrir = new Button("Abrir Cardápio");

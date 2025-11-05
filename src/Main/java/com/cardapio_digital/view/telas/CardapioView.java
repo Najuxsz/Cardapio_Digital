@@ -18,12 +18,6 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
- * Classe responsável pela tela principal do Cardápio Digital.
- * Aqui é montada toda a interface e a lógica visual (sem regras de negócio ou BD).
- * Exibe os pratos cadastrados e demonstra ordenação com diferentes algoritmos.
- */
-
 public class CardapioView {
 
     // Lista principal de pratos exibidos na tabela
@@ -32,6 +26,9 @@ public class CardapioView {
     // Componentes principais
     private TableView<Prato> table;
     private VBox bubbleBox, insertionBox, quickBox;
+
+    // Labels para mostrar o tempo de execução
+    private Label tempoBubble, tempoInsertion, tempoQuick;
 
     public void start(Stage stage) {
 
@@ -47,9 +44,8 @@ public class CardapioView {
 
         // ===== CAMPO DE BUSCA =====
         TextField txtBusca = new TextField();
-        txtBusca.setPromptText("Buscar prato");
+        txtBusca.setPromptText("Buscar prato pelo id");
 
-        // Botão para aplicar filtro de busca
         Button btnBuscar = criarBotao("#FF7043", "Buscar", 14, e -> filtrarTabela(txtBusca.getText()));
 
         // ===== OPÇÕES DE ORDENAÇÃO =====
@@ -57,13 +53,12 @@ public class CardapioView {
         comboOrdenar.getItems().addAll("Nome", "Preço", "Tempo de Preparo");
         comboOrdenar.setPromptText("Ordenar por");
 
-        // Botão que aplica a ordenação conforme o critério escolhido
         Button btnOrdenar = criarBotao("#FFA726", "Ordenar", 14, e -> aplicarOrdenacao(comboOrdenar.getValue()));
 
         // ===== TABELA PRINCIPAL =====
         table = criarTabelaPratos();
         table.setItems(pratos);
-        table.setPrefHeight(250); // deixa espaço para as tabelas de ordenação
+        table.setPrefHeight(250);
 
         // ===== TABELAS DE ORDENAÇÃO =====
         bubbleBox = criarBoxOrdenacao("Bubble Sort");
@@ -74,7 +69,7 @@ public class CardapioView {
         ordenacoesBox.setPadding(new Insets(10));
         ordenacoesBox.setAlignment(Pos.CENTER);
 
-        // ===== ORGANIZAÇÃO GERAL DA TELA =====
+        // ===== ORGANIZAÇÃO GERAL =====
         HBox topo = new HBox(10, txtBusca, btnBuscar, comboOrdenar, btnOrdenar, btnAdicionar, btnSair);
         topo.setAlignment(Pos.CENTER);
         topo.setPadding(new Insets(10));
@@ -83,7 +78,6 @@ public class CardapioView {
         root.setPadding(new Insets(20));
         root.setStyle("-fx-background-color:#FFF7E6;");
 
-        // Exibição da cena
         Scene scene = new Scene(root, 1100, 700);
         stage.setScene(scene);
         stage.setTitle("Cardápio Digital");
@@ -92,7 +86,6 @@ public class CardapioView {
 
     // ==================== MÉTODOS AUXILIARES ====================
 
-    // Cria botões com estilo padrão e ação definida
     private Button criarBotao(String cor, String texto, int fontSize, javafx.event.EventHandler<javafx.event.ActionEvent> acao) {
         Button btn = new Button(texto);
         btn.setStyle("-fx-background-color:" + cor + "; -fx-text-fill:white; -fx-background-radius: 10; -fx-padding: 6 12;");
@@ -102,18 +95,15 @@ public class CardapioView {
         return btn;
     }
 
-    // Cria e configura a tabela principal de pratos
     private TableView<Prato> criarTabelaPratos() {
         TableView<Prato> t = new TableView<>();
         t.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        // Colunas da tabela principal
         TableColumn<Prato, String> colNome = criarColuna("Nome", "nome");
         TableColumn<Prato, Double> colPreco = criarColuna("Preço", "preco");
         TableColumn<Prato, Double> colTempo = criarColuna("Tempo (min)", "tempoPreparo");
         TableColumn<Prato, String> colDescricao = criarColuna("Descrição", "descricao");
 
-        // Coluna com botão de remoção
         TableColumn<Prato, Void> colAcao = new TableColumn<>("Ação");
         colAcao.setCellFactory(param -> new TableCell<>() {
             private final Button btnRemover = criarBotao("#FF7043", "Remover", 12, e -> {
@@ -132,7 +122,6 @@ public class CardapioView {
         return t;
     }
 
-    // Cria uma coluna sem permitir ordenação automática (sem setas)
     private <T> TableColumn<Prato, T> criarColuna(String titulo, String prop) {
         TableColumn<Prato, T> col = new TableColumn<>(titulo);
         col.setCellValueFactory(new PropertyValueFactory<>(prop));
@@ -140,7 +129,6 @@ public class CardapioView {
         return col;
     }
 
-    // Cria as tabelas de demonstração de ordenação (Bubble, Insertion, Quick)
     private VBox criarBoxOrdenacao(String titulo) {
         Label label = new Label(titulo);
         label.setFont(Font.font(16));
@@ -151,20 +139,32 @@ public class CardapioView {
         boxTable.setPrefHeight(200);
         boxTable.setPrefWidth(320);
 
-        // Exibe sempre Nome, Preço e Tempo
         TableColumn<Prato, String> colNome = criarColuna("Nome", "nome");
         TableColumn<Prato, Double> colPreco = criarColuna("Preço", "preco");
         TableColumn<Prato, Double> colTempo = criarColuna("Tempo", "tempoPreparo");
 
         boxTable.getColumns().addAll(colNome, colPreco, colTempo);
 
-        VBox box = new VBox(8, label, boxTable);
+        Label tempoLabel = new Label("Tempo: -- ms");
+        tempoLabel.setFont(Font.font(13));
+        tempoLabel.setTextFill(Color.web("#5D4037"));
+        tempoLabel.setAlignment(Pos.CENTER);
+
+        VBox box = new VBox(8, label, boxTable, tempoLabel);
+        box.setAlignment(Pos.CENTER);
         box.setPadding(new Insets(8));
         box.setStyle("-fx-background-color:#FFE0B2; -fx-border-color:#FFB74D; -fx-border-radius:10; -fx-background-radius:10;");
+
+        // Atribui o label certo a cada tipo
+        switch (titulo) {
+            case "Bubble Sort" -> tempoBubble = tempoLabel;
+            case "Insertion Sort" -> tempoInsertion = tempoLabel;
+            case "Quick Sort" -> tempoQuick = tempoLabel;
+        }
+
         return box;
     }
 
-    // Filtra os pratos pelo nome
     private void filtrarTabela(String filtro) {
         if (filtro == null || filtro.isEmpty()) {
             table.setItems(pratos);
@@ -175,26 +175,23 @@ public class CardapioView {
         }
     }
 
-    // Janela modal para adicionar novo prato
     private void showAdicionarPrato() {
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Adicionar Prato");
 
-        // Campos de entrada
         TextField txtNome = new TextField(); txtNome.setPromptText("Nome");
         TextField txtPreco = new TextField(); txtPreco.setPromptText("Preço");
         TextField txtTempo = new TextField(); txtTempo.setPromptText("Tempo de Preparo");
         TextArea txtDescricao = new TextArea(); txtDescricao.setPromptText("Descrição");
 
-        // Botões de salvar/cancelar
         Button btnSalvar = criarBotao("#8B0000", "Salvar", 14, e -> {
             try {
                 if(txtNome.getText().isEmpty()) throw new Exception("Nome obrigatório");
                 pratos.add(new Prato(
                         txtNome.getText(),
-                        Double.parseDouble(txtPreco.getText()),
-                        Double.parseDouble(txtTempo.getText()),
+                        Integer.parseInt(txtPreco.getText()),
+                        Integer.parseInt(txtTempo.getText()),
                         txtDescricao.getText()
                 ));
                 stage.close();
@@ -218,7 +215,6 @@ public class CardapioView {
 
     // ==================== ORDENAÇÃO ====================
 
-    // Aplica ordenação usando os 3 algoritmos e destaca a coluna usada
     private void aplicarOrdenacao(String criterio) {
         if (criterio == null) return;
 
@@ -226,21 +222,32 @@ public class CardapioView {
 
         // Bubble Sort
         List<Prato> bubble = new ArrayList<>(lista);
+        long inicio = System.nanoTime();
         bubbleSort(bubble, criterio);
+        long fim = System.nanoTime();
+        double tempoB = (fim - inicio) / 1_000_000.0;
         atualizarTabelaOrdenacao((TableView<Prato>) bubbleBox.getChildren().get(1), bubble, criterio);
+        tempoBubble.setText(String.format("Tempo: %.3f ms", tempoB));
 
         // Insertion Sort
         List<Prato> insertion = new ArrayList<>(lista);
+        inicio = System.nanoTime();
         insertionSort(insertion, criterio);
+        fim = System.nanoTime();
+        double tempoI = (fim - inicio) / 1_000_000.0;
         atualizarTabelaOrdenacao((TableView<Prato>) insertionBox.getChildren().get(1), insertion, criterio);
+        tempoInsertion.setText(String.format("Tempo: %.3f ms", tempoI));
 
         // Quick Sort
         List<Prato> quick = new ArrayList<>(lista);
+        inicio = System.nanoTime();
         quickSort(quick, 0, quick.size() - 1, criterio);
+        fim = System.nanoTime();
+        double tempoQ = (fim - inicio) / 1_000_000.0;
         atualizarTabelaOrdenacao((TableView<Prato>) quickBox.getChildren().get(1), quick, criterio);
+        tempoQuick.setText(String.format("Tempo: %.3f ms", tempoQ));
     }
 
-    // Atualiza tabela de cada algoritmo e pinta a coluna filtrada
     private void atualizarTabelaOrdenacao(TableView<Prato> tableOrdenacao, List<Prato> lista, String criterio) {
         tableOrdenacao.setItems(FXCollections.observableArrayList(lista));
         tableOrdenacao.getColumns().forEach(c -> c.setStyle("-fx-background-color: transparent;"));
@@ -251,7 +258,6 @@ public class CardapioView {
         }
     }
 
-    // Define como comparar dois pratos conforme o critério
     private int comparar(Prato a, Prato b, String criterio) {
         return switch (criterio) {
             case "Nome" -> a.getNome().compareToIgnoreCase(b.getNome());
@@ -261,7 +267,6 @@ public class CardapioView {
         };
     }
 
-    // Implementação dos algoritmos de ordenação
     private void bubbleSort(List<Prato> lista, String criterio) {
         for (int i = 0; i < lista.size() - 1; i++)
             for (int j = 0; j < lista.size() - i - 1; j++)
