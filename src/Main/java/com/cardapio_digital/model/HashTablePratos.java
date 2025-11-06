@@ -38,19 +38,22 @@ public class HashTablePratos {
      * funcaoHash : Calcula o índice da tabela hash a partir do nome do prato.
      *
      * <p>Como estamos lidando com strings como chave, usamos o método hashCode()
-     * do Java para gerar um valor inteiro a partir da string. Normalmente, o hashCode()
-     * pode gerar números negativos, mas nesse caso não é necessário usar Math.abs(),
-     * pois o operador módulo (%) com tamanho_vetor garante que o índice esteja dentro
-     * do intervalo válido da tabela hash.</p>
+     * do Java para gerar um valor inteiro a partir da string. O hashCode() pode
+     * gerar números negativos, então usamos Math.abs() (ou a operação com
+     * 0x7fffffff) para garantir que o índice final seja sempre positivo e esteja
+     * dentro do intervalo válido da tabela hash.</p>
      *
-     * @param chave Nome do prato
      * @return índice da tabela hash (entre 0 e tamanho_vetor - 1)
      */
+    private int funcaoHash(String nome) {
+        // Gera um número a partir do nome
+        int hash = nome.hashCode();
 
-    private int funcaoHash(String chave) {
-
-        return chave.hashCode() % tamanhoVetor;
+        // Garante que o índice será sempre positivo
+        return Math.abs(hash % tabelaHash.length);
     }
+
+
     /**
      * Insere um prato na tabela hash.
      *

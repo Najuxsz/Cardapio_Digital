@@ -1,5 +1,4 @@
 package com.cardapio_digital.view.telas;
-
 import com.cardapio_digital.model.Prato;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CardapioView {
-
     // Lista principal de pratos exibidos na tabela
     private final ObservableList<Prato> pratos = FXCollections.observableArrayList();
 
@@ -213,7 +211,12 @@ public class CardapioView {
         stage.show();
     }
 
+
+
     // ==================== ORDENAÇÃO ====================
+    // Este método é chamado quando o usuário clica em "Ordenar".
+    // Ele aplica os três algoritmos (Bubble, Insertion, Quick),
+    // mede o tempo de execução e exibe os resultados lado a lado.
 
     private void aplicarOrdenacao(String criterio) {
         if (criterio == null) return;
@@ -299,6 +302,9 @@ public class CardapioView {
 
     private int partition(List<Prato> lista, int low, int high, String criterio) {
         Prato pivot = lista.get(high);
+
+        System.out.println("Pivô: " + pivot.getNome());
+
         int i = low - 1;
         for (int j = low; j < high; j++) {
             if (comparar(lista.get(j), pivot, criterio) <= 0) {
@@ -311,6 +317,12 @@ public class CardapioView {
         Prato temp = lista.get(i + 1);
         lista.set(i + 1, lista.get(high));
         lista.set(high, temp);
+
+        System.out.println("Lista após partição: ");
+        for (Prato p : lista) {
+            System.out.print(p.getNome() + " ");
+        }
+
         return i + 1;
     }
 }
