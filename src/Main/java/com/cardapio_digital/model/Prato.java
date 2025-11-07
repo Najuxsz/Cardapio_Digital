@@ -1,8 +1,7 @@
 package com.cardapio_digital.model;
 
-//atributos da classe prato, são os mesmos do banco de dados, iremos fazer o crud sobre eles
-//CASO SEJA NECESSÁRIO FAZER A INSERÇÃO DE UM NOVO CAMPO, COMO CALORIAS, CATEGORIA...
-//deve-se adicionar aqui como atributo, no construtor, nos getters/setters, no banco de dados e no método DAO
+import java.util.Objects;
+
 public class Prato {
     private int id;
     private String nome;
@@ -11,28 +10,36 @@ public class Prato {
     private String descricao;
 
     public Prato(int id, String nome, int preco, int tempoPreparo, String descricao) {
-
-        if (preco < 0) throw new IllegalArgumentException("Preço não pode ser negativo");
-        if (tempoPreparo < 0) throw new IllegalArgumentException("Tempo não pode ser negativo");
-
+        validarParametros(nome, preco, tempoPreparo);
         this.id = id;
         this.nome = nome;
         this.preco = preco;
         this.tempoPreparo = tempoPreparo;
-        this.descricao = descricao;
+        this.descricao = descricao != null ? descricao : "";
     }
 
     public Prato(String nome, int preco, int tempoPreparo, String descricao) {
-        this.nome = nome;
-        this.preco = preco;
-        this.tempoPreparo = tempoPreparo;
-        this.descricao = descricao;
+        this(0, nome, preco, tempoPreparo, descricao);
     }
 
     public Prato() {
+        this.nome = "";
+        this.descricao = "";
     }
 
+    private void validarParametros(String nome, int preco, int tempoPreparo) {
+        if (nome == null || nome.trim().isEmpty()) {
+            throw new IllegalArgumentException("Nome não pode ser vazio");
+        }
+        if (preco < 0) {
+            throw new IllegalArgumentException("Preço não pode ser negativo");
+        }
+        if (tempoPreparo < 0) {
+            throw new IllegalArgumentException("Tempo não pode ser negativo");
+        }
+    }
 
+    // Getters e Setters
     public int getId() {
         return id;
     }
@@ -46,7 +53,9 @@ public class Prato {
     }
 
     public void setNome(String nome) {
-        this.nome = nome;
+        if (nome != null && !nome.trim().isEmpty()) {
+            this.nome = nome;
+        }
     }
 
     public int getPreco() {
@@ -54,7 +63,9 @@ public class Prato {
     }
 
     public void setPreco(int preco) {
-        this.preco = preco;
+        if (preco >= 0) {
+            this.preco = preco;
+        }
     }
 
     public int getTempoPreparo() {
@@ -62,7 +73,9 @@ public class Prato {
     }
 
     public void setTempoPreparo(int tempoPreparo) {
-        this.tempoPreparo = tempoPreparo;
+        if (tempoPreparo >= 0) {
+            this.tempoPreparo = tempoPreparo;
+        }
     }
 
     public String getDescricao() {
@@ -70,16 +83,25 @@ public class Prato {
     }
 
     public void setDescricao(String descricao) {
-        this.descricao = descricao;
+        this.descricao = descricao != null ? descricao : "";
     }
 
     @Override
-    //método toString() vem da classe Object, que é a classe base de todas as classes em Java.
-    //define como o objeto será convertido para texto
     public String toString() {
-        return String.format(
-                "Prato: %d | %s | R$ %.2f | %s min | %s",
-                id, nome, preco, tempoPreparo, descricao
-        );
+        return String.format("Prato: %d | %s | R$ %d | %d min | %s",
+                id, nome, preco, tempoPreparo, descricao);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Prato)) return false;
+        Prato p = (Prato) o;
+        return nome.equalsIgnoreCase(p.nome);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nome.toLowerCase());
     }
 }

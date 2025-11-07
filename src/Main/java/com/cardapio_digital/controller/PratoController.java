@@ -1,18 +1,5 @@
-/**
- * O PratoController é o intermediário entre a tela (View) e as classes de lógica/dados (DAO e HashTablePratos).
- *
- * Ele:
- *  - Recebe as ações da interface (ex: clicar em “Adicionar”, “Editar”, “Remover”);
- *  - Chama o PratoDAO para inserir, buscar, atualizar ou remover no banco;
- *  - Atualiza a tabela (ObservableList) que aparece na tela;
- *  - Mantém a HashTablePratos sincronizada (cache em memória).
- *
- * Além disso, pode ser usado para testes ou demonstrações em console (ex: ordenações, buscas, tempos).
- */
-
 package com.cardapio_digital.controller;
 
-import com.cardapio_digital.dao.PratoDAO;
 import com.cardapio_digital.model.HashTablePratos;
 import com.cardapio_digital.model.Prato;
 import javafx.collections.FXCollections;
@@ -22,99 +9,138 @@ import java.util.List;
 
 public class PratoController {
 
-    private final PratoDAO pratoDAO;
     private final HashTablePratos hashTable;
-
-    // Lista principal que será exibida na tela
-    private final ObservableList<Prato> pratosObservable = FXCollections.observableArrayList();
+    private final ObservableList<Prato> pratosObservable;
+    private int idCounter;
 
     public PratoController() {
-        this.pratoDAO = new PratoDAO();
         this.hashTable = new HashTablePratos();
-
-        carregarPratos(); // inicializa tabela e hashtable
+        this.pratosObservable = FXCollections.observableArrayList();
+        this.idCounter = 1;
+        carregarPratosIniciais();
     }
 
-    /**
-     * Carrega todos os pratos do banco e atualiza a hash table.
-     */
-    public void carregarPratos() {
-        List<Prato> lista = pratoDAO.listarPrato();
-        pratosObservable.setAll(lista);
-        hashTable.carregarPratos(lista);
-        System.out.println("[INFO] Pratos carregados: " + lista.size());
+    private void carregarPratosIniciais() {
+        adicionarPrato(new Prato("Pizza Margherita", 35, 20, "Deliciosa pizza com molho de tomate, mussarela e manjericão"));
+        adicionarPrato(new Prato("Hambúrguer Artesanal", 28, 15, "Hambúrguer de carne angus com queijo cheddar"));
+        adicionarPrato(new Prato("Sushi Combinado", 45, 25, "Seleção de sushis frescos e sashimis"));
+        adicionarPrato(new Prato("Lasanha à Bolonhesa", 32, 30, "Lasanha tradicional com molho bolonhesa"));
+        adicionarPrato(new Prato("Salada Caesar", 22, 10, "Salada com alface romana, croutons e molho caesar"));
     }
 
     public ObservableList<Prato> getPratosObservable() {
         return pratosObservable;
     }
 
-    /**
-     * Adiciona um novo prato ao banco, à hash table e à lista visível.
-     */
     public void adicionarPrato(Prato p) {
-        pratoDAO.CadastrarPrato(p);
+        if (p == null) {
+            throw new IllegalArgumentException("Prato não pode ser nulo");
+        }
+
+        p.setId(idCounter++);
         hashTable.inserirPrato(p);
         pratosObservable.add(p);
-        System.out.println("[ADD] Prato adicionado: " + p.getNome());
     }
 
-    /**
-     * Remove um prato do banco, da hash table e da lista visível.
-     */
-    public void removerPrato(Prato p) {
-        pratoDAO.removerPrato(p.getId());
-        hashTable.removerPrato(p.getNome());
-        pratosObservable.remove(p);
-        System.out.println("[REMOVE] Prato removido: " + p.getNome());
-    }
-
-    /**
-     * Edita os dados de um prato existente.
-     */
-    public void editarPrato(Prato p) {
-        pratoDAO.editarPrato(p);
-        hashTable.atualizarPrato(p);
-        carregarPratos(); // recarrega a lista e sincroniza tudo
-        System.out.println("[EDIT] Prato editado: " + p.getNome());
-    }
-
-    /**
-     * Busca um prato pelo ID.
-     */
-    public Prato buscarPorId(int id) {
-        Prato p = pratoDAO.buscarPorId(id);
-        System.out.println("[BUSCA POR ID] Resultado: " + (p != null ? p.getNome() : "Nenhum prato encontrado."));
-        return p;
-    }
-
-    /** Busca um prato pelo nome usando a hash table. */
-    public Prato buscarPorNome(String nome) {
-        Prato p = hashTable.buscarPrato(nome);
-        if (p != null) {
-            System.out.println("[HASH BUSCA] Prato encontrado: " + p.getNome());
-        } else {
-            System.out.println("[HASH BUSCA] Nenhum prato com o nome '" + nome + "' foi encontrado.");
+    public boolean removerPrato(Prato p) {
+        if (p == null) {
+            return false;
         }
-        return p;
+
+        boolean removido = hashTable.removerPrato(p.getNome());
+        if (removido) {
+            pratosObservable.remove(p);
+        }
+        return removido;
     }
 
-    /**
-     * Exemplo simples de comparação entre tempos de busca (HashTable x Banco de Dados).
+    public Prato buscarPorNome(String nome) {
+        return hashTable.buscarPrato(nome);
+    }
 
-    public void compararTempoDeBusca(String nome) {
-        long inicioHash = System.nanoTime();
-        Prato hashResult = hashTable.buscarPrato(nome);
-        long fimHash = System.nanoTime();
+    public Prato[] exportarPratos() {
+        return hashTable.exportarPratos();
+    }
 
-        long inicioBanco = System.nanoTime();
-        Prato dbResult = pratoDAO.buscarPorNome(nome); // se quiser implementar no DAO
-        long fimBanco = System.nanoTime();
+    public int getQuantidadePratos() {
+        return pratosObservable.size();
+    }
 
-        System.out.println("\n--- Comparação de Tempo de Busca ---");
-        System.out.println("HashTable: " + (fimHash - inicioHash) / 1_000_000.0 + " ms");
-        System.out.println("Banco de Dados: " + (fimBanco - inicioBanco) / 1_000_000.0 + " ms");
-        System.out.println("-----------------------------------\n");
-     **/
+    // Métodos de ordenação
+    public void bubbleSort(List<Prato> lista, String criterio) {
+        if (lista == null || lista.isEmpty()) {
+            return;
+        }
 
+        for (int i = 0; i < lista.size() - 1; i++) {
+            for (int j = 0; j < lista.size() - i - 1; j++) {
+                if (comparar(lista.get(j), lista.get(j + 1), criterio) > 0) {
+                    Prato temp = lista.get(j);
+                    lista.set(j, lista.get(j + 1));
+                    lista.set(j + 1, temp);
+                }
+            }
+        }
+    }
+
+    public void insertionSort(List<Prato> lista, String criterio) {
+        if (lista == null || lista.isEmpty()) {
+            return;
+        }
+
+        for (int i = 1; i < lista.size(); i++) {
+            Prato key = lista.get(i);
+            int j = i - 1;
+
+            while (j >= 0 && comparar(lista.get(j), key, criterio) > 0) {
+                lista.set(j + 1, lista.get(j));
+                j--;
+            }
+            lista.set(j + 1, key);
+        }
+    }
+
+    public void quickSort(List<Prato> lista, int low, int high, String criterio) {
+        if (lista == null || lista.isEmpty() || low >= high) {
+            return;
+        }
+
+        if (low < high) {
+            int pi = partition(lista, low, high, criterio);
+            quickSort(lista, low, pi - 1, criterio);
+            quickSort(lista, pi + 1, high, criterio);
+        }
+    }
+
+    private int partition(List<Prato> lista, int low, int high, String criterio) {
+        Prato pivot = lista.get(high);
+        int i = low - 1;
+
+        for (int j = low; j < high; j++) {
+            if (comparar(lista.get(j), pivot, criterio) <= 0) {
+                i++;
+                Prato temp = lista.get(i);
+                lista.set(i, lista.get(j));
+                lista.set(j, temp);
+            }
+        }
+
+        Prato temp = lista.get(i + 1);
+        lista.set(i + 1, lista.get(high));
+        lista.set(high, temp);
+        return i + 1;
+    }
+
+    private int comparar(Prato a, Prato b, String criterio) {
+        if (a == null || b == null) {
+            return 0;
+        }
+
+        return switch (criterio) {
+            case "Nome" -> a.getNome().compareToIgnoreCase(b.getNome());
+            case "Preço" -> Integer.compare(a.getPreco(), b.getPreco());
+            case "Tempo de Preparo" -> Integer.compare(a.getTempoPreparo(), b.getTempoPreparo());
+            default -> 0;
+        };
+    }
 }

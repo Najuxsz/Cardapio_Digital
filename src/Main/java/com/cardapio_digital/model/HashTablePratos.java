@@ -2,127 +2,102 @@ package com.cardapio_digital.model;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
-/**
- * Classe que representa uma Tabela Hash de pratos.
- */
 public class HashTablePratos {
 
-    /** Vetor de listas encadeadas que armazena os pratos */
-    private LinkedList<Prato>[] tabelaHash;
+    private static final int TAMANHO_INICIAL = 10;
+    private static final double FATOR_CARGA_MAXIMO = 0.75;
 
-    /**
-     * Tamanho do vetor da tabela hash.
-     * - Define a quantidade de posições na tabela hash.
-     * - Cada posição guarda uma lista encadeada (LinkedList) de pratos,
-     *   que permite armazenar múltiplos pratos no mesmo índice (encadeamento externo).
-     * - Importante: esse número **não limita a quantidade de pratos** que podem ser
-     *   armazenados na tabela; cada lista encadeada pode crescer dinamicamente.
-     * - Inicialmente definido como 10, mas pode ser aumentado para reduzir colisões
-     *   se o número de pratos aumentar significativamente.
-     */
-    private int tamanhoVetor = 10;
-    /**
-     * Construtor da tabela hash.
-     *
-     * - Inicializa o vetor de listas encadeadas.
-     * - Cada posição do vetor é uma LinkedList vazia (colisões são armazenadas nelas).
-     */
+    private LinkedList<Prato>[] tabelaHash;
+    private int tamanhoVetor;
+    private int quantidadeElementos;
+
+    @SuppressWarnings("unchecked")
     public HashTablePratos() {
-        tabelaHash = new LinkedList[tamanhoVetor];
+        this.tamanhoVetor = TAMANHO_INICIAL;
+        this.quantidadeElementos = 0;
+        this.tabelaHash = new LinkedList[tamanhoVetor];
+
         for (int i = 0; i < tamanhoVetor; i++) {
             tabelaHash[i] = new LinkedList<>();
         }
     }
+
     /**
-     * funcaoHash : Calcula o índice da tabela hash a partir do nome do prato.
-     *
-     * <p>Como estamos lidando com strings como chave, usamos o método hashCode()
-     * do Java para gerar um valor inteiro a partir da string. O hashCode() pode
-     * gerar números negativos, então usamos Math.abs() (ou a operação com
-     * 0x7fffffff) para garantir que o índice final seja sempre positivo e esteja
-     * dentro do intervalo válido da tabela hash.</p>
-     *
-     * @return índice da tabela hash (entre 0 e tamanho_vetor - 1)
+     * Função hash que mapeia o nome do prato para um índice na tabela
      */
     private int funcaoHash(String nome) {
-        // Gera um número a partir do nome
-        int hash = nome.hashCode();
-
-        // Garante que o índice será sempre positivo
-        return Math.abs(hash % tabelaHash.length);
+        if (nome == null || nome.isEmpty()) {
+            return 0;
+        }
+        return Math.abs(nome.toLowerCase().hashCode() % tamanhoVetor);
     }
 
-
     /**
-     * Insere um prato na tabela hash.
-     *
-     * Este método recebe um objeto Prato e o adiciona na tabela hash.
-     * O índice na tabela é calculado a partir do nome do prato, mas o
-     * objeto completo é armazenado na lista encadeada para preservar todos
-     * os atributos do prato (preço, tempo de preparo, descrição etc.).
-     *
-     * Segue os princípios de programação orientada a objetos:
-     * - Encapsulamento: acessa atributos do prato apenas via getters.
-     * - Coesão: o método tem apenas uma responsabilidade: inserir o prato (conferindo se o mesmo já existe).
-     *
-     * @param p Prato a ser inserido na tabela hash
+     * Insere um prato na tabela hash
+     * Evita duplicatas baseado no nome do prato
      */
     public void inserirPrato(Prato p) {
-        int indice = funcaoHash(p.getNome());
+        if (p == null || p.getNome() == null || p.getNome().isEmpty()) {
+            return;
+        }
 
-        // Acessa a lista encadeada naquele índice
+        // Verifica se precisa redimensionar
+        if (precisaRedimensionar()) {
+            redimensionar();
+        }
+
+        int indice = funcaoHash(p.getNome());
         LinkedList<Prato> lista = tabelaHash[indice];
 
         // Verifica se já existe um prato com o mesmo nome
         for (Prato existente : lista) {
-            if (existente.getNome().equalsIgnoreCase(p.getNome())) {
-                System.out.println("Prato duplicado! Não será inserido.");
-                return;
+            if (existente.equals(p)) {
+                return; // Não permite duplicatas
             }
         }
-        // Adiciona o prato à lista encadeada
+
         lista.add(p);
+        quantidadeElementos++;
     }
 
     /**
-     * Busca um prato na tabela hash pelo nome (chave).
-     *
-     * - Calcula o índice da chave.
-     * - Percorre a lista naquela posição.
-     * - Retorna o prato se encontrado ou null se não existir.
-     *
-     * @param nomePrato Nome do prato a buscar
-     * @return Prato encontrado ou null
+     * Busca um prato pelo nome
+     * Retorna null se não encontrado
      */
+    public Prato buscarPrato(String nome) {
+        if (nome == null || nome.isEmpty()) {
+            return null;
+        }
 
-    public Prato buscarPrato(String nomePrato) {
-        int chaveHash = funcaoHash(nomePrato);
-        LinkedList<Prato> lista = tabelaHash[chaveHash];
+        int indice = funcaoHash(nome);
+        LinkedList<Prato> lista = tabelaHash[indice];
+
         for (Prato p : lista) {
-            if (p.getNome().equalsIgnoreCase(nomePrato)) {
+            if (p.getNome().equalsIgnoreCase(nome)) {
                 return p;
             }
         }
         return null;
     }
-    /**
-     * Remove um prato da tabela hash pelo nome.
-     *
-     * - Calcula o índice da chave.
-     * - Percorre a lista naquela posição.
-     * - Remove o prato se encontrado.
-     *
-     * @param nome Nome do prato a remover
-     * @return true se o prato foi removido, false caso contrário
-     */
 
+    /**
+     * Remove um prato pelo nome
+     * Retorna true se removido com sucesso, false caso contrário
+     */
     public boolean removerPrato(String nome) {
+        if (nome == null || nome.isEmpty()) {
+            return false;
+        }
+
         int indice = funcaoHash(nome);
         LinkedList<Prato> lista = tabelaHash[indice];
+
         for (Prato p : lista) {
             if (p.getNome().equalsIgnoreCase(nome)) {
                 lista.remove(p);
+                quantidadeElementos--;
                 return true;
             }
         }
@@ -130,29 +105,130 @@ public class HashTablePratos {
     }
 
     /**
-     * Exporta todos os pratos da tabela hash para um vetor.
-     *
-     * - Percorre cada posição do vetor da tabela hash .
-     * - Cada posição contém uma lista encadeada de pratos, que armazena possíveis colisões
-     *   (mais de um prato com índice hash igual).
-     * - Para não precisar calcular antes a quantidade total de pratos,
-     *   usamos um ArrayList dinâmico, que cresce automaticamente conforme adicionamos os pratos.
-     * - Adiciona todos os pratos de cada lista encadeada no ArrayList.
-     * - Por fim, converte o ArrayList para um vetor fixo (Prato[]),
-     *   que é mais fácil de usar em métodos de ordenação ou outras operações posteriores.
-     *
-     * @return vetor contendo todos os pratos armazenados na tabela hash
+     * Exporta todos os pratos da tabela hash para um array
      */
-
     public Prato[] exportarPratos() {
-        ArrayList<Prato> listaDinamicaPratos = new ArrayList<>();
+        List<Prato> lista = new ArrayList<>();
 
-        for (int i = 0; i < tamanhoVetor; i++) {
-            for (Prato p : tabelaHash[i]) {
-                listaDinamicaPratos.add(p);
+        for (LinkedList<Prato> bucket : tabelaHash) {
+            if (bucket != null) {
+                lista.addAll(bucket);
             }
         }
-        return listaDinamicaPratos.toArray(new Prato[0]);
+
+        return lista.toArray(new Prato[0]);
     }
 
+    /**
+     * Carrega uma lista de pratos na tabela hash
+     */
+    public void carregarPratos(List<Prato> pratos) {
+        if (pratos == null) {
+            return;
+        }
+
+        for (Prato p : pratos) {
+            if (p != null) {
+                inserirPrato(p);
+            }
+        }
+    }
+
+    /**
+     * Retorna a quantidade de elementos na tabela
+     */
+    public int getQuantidadeElementos() {
+        return quantidadeElementos;
+    }
+
+    /**
+     * Verifica se a tabela está vazia
+     */
+    public boolean isEmpty() {
+        return quantidadeElementos == 0;
+    }
+
+    /**
+     * Limpa todos os elementos da tabela
+     */
+    public void limpar() {
+        for (int i = 0; i < tamanhoVetor; i++) {
+            if (tabelaHash[i] != null) {
+                tabelaHash[i].clear();
+            }
+        }
+        quantidadeElementos = 0;
+    }
+
+    /**
+     * Verifica se a tabela precisa ser redimensionada
+     */
+    private boolean precisaRedimensionar() {
+        double fatorCarga = (double) quantidadeElementos / tamanhoVetor;
+        return fatorCarga > FATOR_CARGA_MAXIMO;
+    }
+
+    /**
+     * Redimensiona a tabela hash dobrando seu tamanho
+     * Rehash de todos os elementos
+     */
+    @SuppressWarnings("unchecked")
+    private void redimensionar() {
+        int novoTamanho = tamanhoVetor * 2;
+        LinkedList<Prato>[] antigaTabela = tabelaHash;
+
+        // Cria nova tabela
+        tabelaHash = new LinkedList[novoTamanho];
+        tamanhoVetor = novoTamanho;
+        quantidadeElementos = 0;
+
+        // Inicializa buckets
+        for (int i = 0; i < tamanhoVetor; i++) {
+            tabelaHash[i] = new LinkedList<>();
+        }
+
+        // Reinsere todos os elementos
+        for (LinkedList<Prato> bucket : antigaTabela) {
+            if (bucket != null) {
+                for (Prato p : bucket) {
+                    inserirPrato(p);
+                }
+            }
+        }
+    }
+
+    /**
+     * Retorna o fator de carga atual da tabela
+     */
+    public double getFatorCarga() {
+        return (double) quantidadeElementos / tamanhoVetor;
+    }
+
+    /**
+     * Retorna o tamanho da tabela
+     */
+    public int getTamanhoTabela() {
+        return tamanhoVetor;
+    }
+
+    /**
+     * Retorna estatísticas da distribuição dos elementos
+     */
+    public String getEstatisticas() {
+        int bucketsVazios = 0;
+        int maxColisoes = 0;
+
+        for (LinkedList<Prato> bucket : tabelaHash) {
+            if (bucket.isEmpty()) {
+                bucketsVazios++;
+            } else {
+                maxColisoes = Math.max(maxColisoes, bucket.size());
+            }
+        }
+
+        return String.format(
+                "Tamanho: %d | Elementos: %d | Fator de Carga: %.2f | Buckets Vazios: %d | Maior Colisão: %d",
+                tamanhoVetor, quantidadeElementos, getFatorCarga(), bucketsVazios, maxColisoes
+        );
+    }
 }
