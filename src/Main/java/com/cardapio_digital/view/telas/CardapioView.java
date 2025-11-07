@@ -13,7 +13,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
+import com.cardapio_digital.controller.PratoController;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +27,9 @@ public class CardapioView {
 
     // Labels para mostrar o tempo de execução
     private Label tempoBubble, tempoInsertion, tempoQuick;
+
+    private final PratoController controller = new PratoController();
+
 
     public void start(Stage stage) {
 
@@ -55,7 +58,7 @@ public class CardapioView {
 
         // ===== TABELA PRINCIPAL =====
         table = criarTabelaPratos();
-        table.setItems(pratos);
+        table.setItems(controller.getPratosObservable());
         table.setPrefHeight(250);
 
         // ===== TABELAS DE ORDENAÇÃO =====
@@ -104,9 +107,10 @@ public class CardapioView {
 
         TableColumn<Prato, Void> colAcao = new TableColumn<>("Ação");
         colAcao.setCellFactory(param -> new TableCell<>() {
+
             private final Button btnRemover = criarBotao("#FF7043", "Remover", 12, e -> {
                 Prato prato = getTableView().getItems().get(getIndex());
-                pratos.remove(prato);
+                controller.removerPrato(prato);
             });
 
             @Override
@@ -184,15 +188,18 @@ public class CardapioView {
         TextArea txtDescricao = new TextArea(); txtDescricao.setPromptText("Descrição");
 
         Button btnSalvar = criarBotao("#8B0000", "Salvar", 14, e -> {
+
             try {
                 if(txtNome.getText().isEmpty()) throw new Exception("Nome obrigatório");
-                pratos.add(new Prato(
+                controller.adicionarPrato(new Prato(
                         txtNome.getText(),
                         Integer.parseInt(txtPreco.getText()),
                         Integer.parseInt(txtTempo.getText()),
                         txtDescricao.getText()
                 ));
+
                 stage.close();
+
             } catch (Exception ex) {
                 new Alert(Alert.AlertType.WARNING, "Erro: Nome obrigatório ou valores inválidos").showAndWait();
             }

@@ -20,8 +20,9 @@ public class Main extends Application {
 
     public static void main(String[] args) {
         //Inicia a aplicação JavaFX
-        //launch(args);
+        launch(args);
 
+        /**
         // 🔹 Cria a tabela hash de pratos
         HashTablePratos tabela = new HashTablePratos();
 
@@ -73,5 +74,6 @@ public class Main extends Application {
         System.out.println("\n---- ORDENANDO POR PREÇO (quickSort) ----");
         Prato[] vetor2 = tabela.exportarPratos(); // exporta de novo, para não alterar o original
         Ordenadores.quickSort(vetor2, 0, vetor2.length - 1, "preco");
+         **/
     }
 }

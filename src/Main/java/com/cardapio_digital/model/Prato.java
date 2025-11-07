@@ -29,6 +29,10 @@ public class Prato {
         this.descricao = descricao;
     }
 
+    public Prato() {
+    }
+
+
     public int getId() {
         return id;
     }
