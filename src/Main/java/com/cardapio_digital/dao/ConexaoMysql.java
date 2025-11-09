@@ -10,7 +10,7 @@ public class ConexaoMysql {
 
     private ConexaoMysql(){
         String usuario = "root";
-        String senha = "Ana123";
+        String senha = "v6rdpSVkdQBFi8Q5764";
         String strCon = "jdbc:mysql://127.0.0.1:3306/cardapio_digital?useSSL=false";
         try {
             this.connection = DriverManager.getConnection(strCon, usuario, senha);
