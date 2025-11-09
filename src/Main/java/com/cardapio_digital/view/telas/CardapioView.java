@@ -15,6 +15,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import com.cardapio_digital.utils.Ordenadores;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -162,6 +163,9 @@ public class CardapioView {
                 Prato prato = getTableView().getItems().get(getIndex());
                 if (showConfirmacao("Confirmar", "Deseja realmente remover " + prato.getNome() + "?")) {
                     controller.removerPrato(prato);
+                    table.setItems(FXCollections.observableArrayList(controller.getPratosObservable())); // recarrega
+                    table.refresh(); // força o JavaFX a recriar as células
+
                 }
             });
 
@@ -228,11 +232,15 @@ public class CardapioView {
             String filtroLower = filtro.toLowerCase().trim();
             table.setItems(FXCollections.observableArrayList(
                     controller.getPratosObservable().filtered(p ->
-                            p.getNome().toLowerCase().contains(filtroLower) ||
+                            String.valueOf(p.getId()).contains(filtroLower) || // 🔍 inclui busca por ID
+                                    p.getNome().toLowerCase().contains(filtroLower) ||
                                     p.getDescricao().toLowerCase().contains(filtroLower)
                     )
             ));
         }
+
+        // 🔥 força o JavaFX a redesenhar as células e recriar os botões "Remover"
+        table.refresh();
     }
 
     private void showAdicionarPrato() {
@@ -316,7 +324,7 @@ public class CardapioView {
         // Bubble Sort
         List<Prato> bubble = new ArrayList<>(lista);
         long inicio = System.nanoTime();
-        controller.bubbleSort(bubble, criterio);
+        Ordenadores.bubbleSort(bubble, criterio);
         long tempo = System.nanoTime() - inicio;
         tempoBubble.setText(String.format("Tempo: %.3f ms", tempo / 1_000_000.0));
         atualizarTabelaOrdenacao((TableView<Prato>) bubbleBox.getChildren().get(1), bubble, criterio);
@@ -324,7 +332,7 @@ public class CardapioView {
         // Insertion Sort
         List<Prato> insertion = new ArrayList<>(lista);
         inicio = System.nanoTime();
-        controller.insertionSort(insertion, criterio);
+        Ordenadores.insertionSort(insertion, criterio);
         tempo = System.nanoTime() - inicio;
         tempoInsertion.setText(String.format("Tempo: %.3f ms", tempo / 1_000_000.0));
         atualizarTabelaOrdenacao((TableView<Prato>) insertionBox.getChildren().get(1), insertion, criterio);
@@ -332,7 +340,7 @@ public class CardapioView {
         // Quick Sort
         List<Prato> quick = new ArrayList<>(lista);
         inicio = System.nanoTime();
-        controller.quickSort(quick, 0, quick.size() - 1, criterio);
+        Ordenadores.quickSort(quick, 0, quick.size() - 1, criterio);
         tempo = System.nanoTime() - inicio;
         tempoQuick.setText(String.format("Tempo: %.3f ms", tempo / 1_000_000.0));
         atualizarTabelaOrdenacao((TableView<Prato>) quickBox.getChildren().get(1), quick, criterio);

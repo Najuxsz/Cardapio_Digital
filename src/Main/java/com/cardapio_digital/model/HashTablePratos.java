@@ -102,7 +102,7 @@ public class HashTablePratos {
      * - Percorre a lista naquela posição.
      * - Retorna o prato se encontrado ou null se não existir.
      *
-     * @param nomePrato Nome do prato a buscar
+     * @param nome Nome do prato a buscar
      * @return Prato encontrado ou null
      * Busca um prato pelo nome
      * Retorna null se não encontrado.

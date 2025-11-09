@@ -1,6 +1,7 @@
 package com.cardapio_digital.utils;
 import com.cardapio_digital.model.Prato;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * Classe utilitária responsável por implementar diferentes algoritmos de ordenação
@@ -17,28 +18,24 @@ public class Ordenadores {
      * - Quando dois elementos estão fora de ordem, eles são trocados de posição.
      * - Após cada passagem completa, o maior elemento “sobe” para o final do vetor.
      *
-     * @param vetor Vetor de pratos a ser ordenado.
+     * @param lista Vetor de pratos a ser ordenado.
      * @param criterio Critério de ordenação ("nome", "preco"/"preço", "tempo").
      */
-    public static void bubbleSort(Prato[] vetor, String criterio) {
-        if (vetor == null || vetor.length <= 1) { // Verifica se o vetor é nulo ou se tem 0 ou 1 elemento
-            return;// sai do método sem ordenar nadA
+    public static void bubbleSort(List<Prato> lista, String criterio) {
+        if (lista == null || lista.isEmpty()) {
+            return;
         }
 
-        for (int i = 0; i < vetor.length - 1; i++) {
-            boolean trocou = false;
-
-            for (int j = 0; j < vetor.length - i - 1; j++) { //Ganrantir comparação em pares
-                if (comparar(vetor[j], vetor[j + 1], criterio) > 0) {
-                    trocar(vetor, j, j + 1);
-                    trocou = true;
+        for (int i = 0; i < lista.size() - 1; i++) {
+            for (int j = 0; j < lista.size() - i - 1; j++) {
+                if (comparar(lista.get(j), lista.get(j + 1), criterio) > 0) {
+                    Prato temp = lista.get(j);
+                    lista.set(j, lista.get(j + 1));
+                    lista.set(j + 1, temp);
                 }
             }
-            // Flag de otimização: se não houve trocas, já está ordenado
-            if (!trocou) break;
         }
     }
-
     /**
      * InsertionSort - Algoritmo de ordenação por inserção.
      *
@@ -46,29 +43,25 @@ public class Ordenadores {
      *   aos elementos anteriores.
      * Características:
      *
-     * @param pratos Vetor de pratos a ordenar.
-     * @param comp Objeto que define a lógica de comparação entre dois pratos.
+     * @param lista Vetor de pratos a ordenar.
+     * @param criterio Objeto que define a lógica de comparação entre dois pratos.
      */
-    public static void insertionSort(Prato[] pratos, Comparator<Prato> comp) {
-        if (pratos == null || pratos.length <= 1 || comp == null) { // Verifica se o vetor é nulo ou
+    public static void insertionSort(List<Prato> lista, String criterio) {
+        if (lista == null || lista.isEmpty()) {
             return;
         }
 
-        for (int i = 1; i < pratos.length; i++) {
-            Prato chave = pratos[i];
+        for (int i = 1; i < lista.size(); i++) {
+            Prato key = lista.get(i);
             int j = i - 1;
 
-            // Move os elementos maiores que a chave uma posição à frente
-            while (j >= 0 && comp.compare(pratos[j], chave) > 0) {
-                pratos[j + 1] = pratos[j];
+            while (j >= 0 && comparar(lista.get(j), key, criterio) > 0) {
+                lista.set(j + 1, lista.get(j));
                 j--;
             }
-
-            // Insere a chave na posição correta
-            pratos[j + 1] = chave;
+            lista.set(j + 1, key);
         }
     }
-
     /**
      * QuickSort - Algoritmo de ordenação baseado em "divisão e conquista".
      *
@@ -85,23 +78,22 @@ public class Ordenadores {
      * - Não é estável.
      * - Muito eficiente para grandes quantidades de dados.
      *
-     * @param vetor Vetor de pratos a ser ordenado.
-     * @param inicio Índice inicial do subvetor.
-     * @param fim Índice final do subvetor.
+     * @param lista Vetor de pratos a ser ordenado.
+     * @param low Índice inicial do subvetor.
+     * @param high Índice final do subvetor.
      * @param criterio Critério de ordenação ("nome", "preco"/"preço", "tempo").
      */
-    public static void quickSort(Prato[] vetor, int inicio, int fim, String criterio) {
-        if (vetor == null || inicio >= fim || inicio < 0 || fim >= vetor.length) {
+    public static void quickSort(List<Prato> lista, int low, int high, String criterio) {
+        if (lista == null || lista.isEmpty() || low >= high) {
             return;
         }
 
-        if (inicio < fim) {
-            int indicePivo = particionar(vetor, inicio, fim, criterio);
-            quickSort(vetor, inicio, indicePivo - 1, criterio);
-            quickSort(vetor, indicePivo + 1, fim, criterio);
+        if (low < high) {
+            int pi = partition(lista, low, high, criterio);
+            quickSort(lista, low, pi - 1, criterio);
+            quickSort(lista, pi + 1, high, criterio);
         }
     }
-
     /**
      * Método auxiliar do QuickSort responsável por particionar o vetor.
      *
@@ -110,27 +102,30 @@ public class Ordenadores {
      *   fiquem à esquerda e os maiores à direita.
      * - Retorna o índice final do pivô, que será usado nas chamadas recursivas.
      *
-     * @param vetor Vetor de pratos.
-     * @param inicio Índice inicial.
-     * @param fim Índice final (onde está o pivô).
+     * @param lista Vetor de pratos.
+     * @param low Índice inicial.
+     * @param high Índice final (onde está o pivô).
      * @param criterio Critério de ordenação.
      * @return Índice final do pivô após o particionamento.
      */
-    private static int particionar(Prato[] vetor, int inicio, int fim, String criterio) {
-        Prato pivo = vetor[fim];
-        int i = inicio - 1;
+    private static int partition(List<Prato> lista, int low, int high, String criterio) {
+        Prato pivot = lista.get(high);
+        int i = low - 1;
 
-        for (int j = inicio; j < fim; j++) {
-            if (comparar(vetor[j], pivo, criterio) <= 0) {
+        for (int j = low; j < high; j++) {
+            if (comparar(lista.get(j), pivot, criterio) <= 0) {
                 i++;
-                trocar(vetor, i, j);
+                Prato temp = lista.get(i);
+                lista.set(i, lista.get(j));
+                lista.set(j, temp);
             }
         }
 
-        trocar(vetor, i + 1, fim);
+        Prato temp = lista.get(i + 1);
+        lista.set(i + 1, lista.get(high));
+        lista.set(high, temp);
         return i + 1;
     }
-
     /**
      * Método genérico de comparação entre dois pratos com base em um critério textual.
      *
@@ -148,18 +143,17 @@ public class Ordenadores {
      * @return Resultado numérico da comparação.
      */
     private static int comparar(Prato a, Prato b, String criterio) {
-        if (a == null && b == null) return 0;
-        if (a == null) return 1;
-        if (b == null) return -1;
+        if (a == null || b == null) {
+            return 0;
+        }
 
-        return switch (criterio.toLowerCase()) {
-            case "nome" -> a.getNome().compareToIgnoreCase(b.getNome());
-            case "preco", "preço" -> Integer.compare(a.getPreco(), b.getPreco());
-            case "tempo" -> Integer.compare(a.getTempoPreparo(), b.getTempoPreparo());
+        return switch (criterio) {
+            case "Nome" -> a.getNome().compareToIgnoreCase(b.getNome());
+            case "Preço" -> Integer.compare(a.getPreco(), b.getPreco());
+            case "Tempo de Preparo" -> Integer.compare(a.getTempoPreparo(), b.getTempoPreparo());
             default -> 0;
         };
     }
-
     /**
      * Método auxiliar que troca a posição de dois elementos em um vetor de pratos.
      *
@@ -179,3 +173,9 @@ public class Ordenadores {
         vetor[j] = temp;
     }
 }
+
+
+
+
+
+
