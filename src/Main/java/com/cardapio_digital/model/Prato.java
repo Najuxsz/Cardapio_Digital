@@ -1,5 +1,4 @@
 package com.cardapio_digital.model;
-
 import java.util.Objects;
 
 public class Prato {
@@ -17,11 +16,9 @@ public class Prato {
         this.tempoPreparo = tempoPreparo;
         this.descricao = descricao != null ? descricao : "";
     }
-
     public Prato(String nome, int preco, int tempoPreparo, String descricao) {
         this(0, nome, preco, tempoPreparo, descricao);
     }
-
     public Prato() {
         this.nome = "";
         this.descricao = "";
@@ -39,7 +36,6 @@ public class Prato {
         }
     }
 
-    // Getters e Setters
     public int getId() {
         return id;
     }
@@ -87,12 +83,14 @@ public class Prato {
     }
 
     @Override
+    //define como o objeto é mostrado quando impresso no console
     public String toString() {
         return String.format("Prato: %d | %s | R$ %d | %d min | %s",
                 id, nome, preco, tempoPreparo, descricao);
     }
 
     @Override
+    //define quando dois pratos são considerados iguais
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Prato)) return false;
@@ -101,6 +99,7 @@ public class Prato {
     }
 
     @Override
+    //gera um código numérico único baseado no nome do prato, usado pela tabela hash.
     public int hashCode() {
         return Objects.hash(nome.toLowerCase());
     }

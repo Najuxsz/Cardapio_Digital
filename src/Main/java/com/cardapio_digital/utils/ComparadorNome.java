@@ -3,9 +3,7 @@ package com.cardapio_digital.utils;
 import com.cardapio_digital.model.Prato;
 import java.util.Comparator;
 
-/**
- * Comparator que ordena objetos {@link Prato} pelo nome em ordem alfabética.
- */
+//Comparator que ordena objeto prato pelo nome em ordem alfabética.
 public class ComparadorNome implements Comparator<Prato> {
 
     @Override

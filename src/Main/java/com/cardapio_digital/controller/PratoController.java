@@ -1,17 +1,13 @@
 package com.cardapio_digital.controller;
-
 import com.cardapio_digital.model.HashTablePratos;
 import com.cardapio_digital.model.Prato;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.util.List;
-
 public class PratoController {
-
     private final HashTablePratos hashTable;
-    private final ObservableList<Prato> pratosObservable;
-    private int idCounter;
+    private final ObservableList<Prato> pratosObservable; //lista de pratos
+    private int idCounter; //id dos pratos, é auto incrementado i++
 
     public PratoController() {
         this.hashTable = new HashTablePratos();
@@ -19,8 +15,8 @@ public class PratoController {
         this.idCounter = 1;
         carregarPratosIniciais();
     }
-
     private void carregarPratosIniciais() {
+        //pratos estaticos, estarao sempre no projeto
         adicionarPrato(new Prato("Pizza Margherita", 35, 20, "Deliciosa pizza com molho de tomate, mussarela e manjericão"));
         adicionarPrato(new Prato("Hambúrguer Artesanal", 28, 15, "Hambúrguer de carne angus com queijo cheddar"));
         adicionarPrato(new Prato("Sushi Combinado", 45, 25, "Seleção de sushis frescos e sashimis"));
@@ -38,7 +34,7 @@ public class PratoController {
         }
 
         p.setId(idCounter++);
-        hashTable.inserirPrato(p);
+        hashTable.inserirPrato(p); //prato é add na hashtable
         pratosObservable.add(p);
     }
 
@@ -46,7 +42,6 @@ public class PratoController {
         if (p == null) {
             return false;
         }
-
         boolean removido = hashTable.removerPrato(p.getNome());
         if (removido) {
             pratosObservable.remove(p);
@@ -61,4 +56,15 @@ public class PratoController {
     public int getQuantidadePratos() {
         return pratosObservable.size();
     }
+
+    public Prato buscarPrato(String nome) {
+        if (nome == null || nome.isEmpty()) return null;
+        return hashTable.buscarPrato(nome);
+    }
+
+    public HashTablePratos getTabelaHash() {
+        return hashTable;
+    }
+
+
 }
